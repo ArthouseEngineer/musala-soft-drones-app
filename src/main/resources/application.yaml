@@ -1,1 +1,12 @@
-
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/musala_drones
+    username: postgres
+    password: postgres
+  application:
+    name: musala_drones_application
+logging:
+  file:
+    name: logs/drone_capacity.log
+  level:
+    liquibase: debug

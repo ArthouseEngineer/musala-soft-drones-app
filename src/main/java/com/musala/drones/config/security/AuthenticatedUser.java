@@ -1,4 +1,4 @@
-package com.devglan.springwebfluxjwt.security;
+package com.musala.drones.config.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,10 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author Dhiraj Ray
- *
- */
+
 public class AuthenticatedUser implements Authentication {
 
 	private static final long serialVersionUID = 6861381095901879822L;

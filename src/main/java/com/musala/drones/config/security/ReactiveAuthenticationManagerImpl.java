@@ -9,9 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,11 +19,12 @@ import java.util.stream.Collectors;
 import static com.musala.drones.util.Constants.AUTHORITIES_KEY;
 
 
-@Component("reactiveAuthenticationManager")
+@Component
 @RequiredArgsConstructor
-public class AuthenticationManager implements ReactiveAuthenticationManager {
+public class ReactiveAuthenticationManagerImpl implements ReactiveAuthenticationManager {
 
     private final TokenProvider tokenProvider;
+
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         String authToken = authentication.getCredentials().toString();
@@ -35,12 +36,9 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         }
         if (username != null && !tokenProvider.isTokenExpired(authToken)) {
             Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
-            List<String> roles = claims.get(AUTHORITIES_KEY, List.class);
-            List<SimpleGrantedAuthority> authorities = roles
-                    .stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, username, Collections.emptyList());
+            String role = claims.get(AUTHORITIES_KEY, String.class);
+            List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, username, authorities);
             SecurityContextHolder.getContext().setAuthentication(new AuthenticatedUser(username, authorities));
             return Mono.just(auth);
         } else {

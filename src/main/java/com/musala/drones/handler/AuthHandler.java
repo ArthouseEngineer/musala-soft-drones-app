@@ -1,12 +1,14 @@
-package com.devglan.springwebfluxjwt.handler;
+package com.musala.drones.handler;
 
-import com.devglan.springwebfluxjwt.dto.ApiResponse;
-import com.devglan.springwebfluxjwt.dto.LoginRequest;
-import com.devglan.springwebfluxjwt.dto.LoginResponse;
-import com.devglan.springwebfluxjwt.model.User;
-import com.devglan.springwebfluxjwt.repo.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.musala.drones.model.entity.User;
+import com.musala.drones.model.dto.ApiResponse;
+import com.musala.drones.model.dto.LoginRequest;
+import com.musala.drones.model.dto.LoginResponse;
+import com.musala.drones.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -16,32 +18,27 @@ import reactor.core.publisher.Mono;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
+@RequiredArgsConstructor
 public class AuthHandler {
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private TokenProvider tokenProvider;
+    private final TokenProvider tokenProvider;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public AuthHandler(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public Mono<ServerResponse> login(ServerRequest request) {
         Mono<LoginRequest> loginRequest = request.bodyToMono(LoginRequest.class);
         return loginRequest.flatMap(login -> userRepository.findByUsername(login.getUsername())
-            .flatMap(user -> {
-                if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
-                    return ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromObject(new LoginResponse(tokenProvider.generateToken(user))));
-                } else {
-                    return ServerResponse.badRequest().body(BodyInserters.fromObject(new ApiResponse(400, "Invalid credentials", null)));
-                }
-            }).switchIfEmpty(ServerResponse.badRequest().body(BodyInserters.fromObject(new ApiResponse(400, "User does not exist", null)))));
+                .flatMap(user -> {
+                    if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+                        return ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromValue(new ApiResponse(HttpStatus.OK.value(), "Successful login", new LoginResponse(tokenProvider.generateToken(user)))));
+                    } else {
+                        return ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Invalid credentials", null)));
+                    }
+                })
+                .switchIfEmpty(ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "User does not exist", null)))));
     }
 
     public Mono<ServerResponse> signUp(ServerRequest request) {
@@ -50,7 +47,7 @@ public class AuthHandler {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             return user;
         }).flatMap(user -> userRepository.findByUsername(user.getUsername())
-                .flatMap(dbUser -> ServerResponse.badRequest().body(BodyInserters.fromObject(new ApiResponse(400, "User already exist", null))))
+                .flatMap(dbUser -> ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "User already exist", null))))
                 .switchIfEmpty(userRepository.save(user).flatMap(savedUser -> ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromObject(savedUser)))));
     }
 }

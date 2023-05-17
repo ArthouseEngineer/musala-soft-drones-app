@@ -1,17 +1,19 @@
-package com.devglan.springwebfluxjwt.handler;
+package com.musala.drones.handler;
 
-import com.devglan.springwebfluxjwt.model.Role;
-import com.devglan.springwebfluxjwt.model.User;
-import io.jsonwebtoken.*;
+
+import com.musala.drones.model.entity.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.devglan.springwebfluxjwt.util.Constant.*;
+import static com.musala.drones.util.Constants.ACCESS_TOKEN_VALIDITY_SECONDS;
+import static com.musala.drones.util.Constants.AUTHORITIES_KEY;
+import static com.musala.drones.util.Constants.SIGNING_KEY;
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 @Component
 public class TokenProvider implements Serializable {
@@ -42,15 +44,13 @@ public class TokenProvider implements Serializable {
     }
 
     public String generateToken(User user) {
-        final List<String> authorities = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
+        final String authorities = user.getRole();
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim(AUTHORITIES_KEY, authorities)
-                .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
+                .signWith(HS256, SIGNING_KEY)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS*1000))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
                 .compact();
     }
 
