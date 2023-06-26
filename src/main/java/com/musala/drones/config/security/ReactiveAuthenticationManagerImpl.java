@@ -1,6 +1,6 @@
 package com.musala.drones.config.security;
 
-import com.musala.drones.handler.TokenProvider;
+import com.musala.drones.handlers.TokenProvider;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -11,10 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.musala.drones.util.Constants.AUTHORITIES_KEY;
 

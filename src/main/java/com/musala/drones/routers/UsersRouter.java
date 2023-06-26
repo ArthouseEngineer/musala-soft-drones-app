@@ -1,7 +1,6 @@
-package com.musala.drones.config;
+package com.musala.drones.routers;
 
-import com.musala.drones.handler.AuthHandler;
-import com.musala.drones.handler.UserHandler;
+import com.musala.drones.handlers.UserHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 
 @Component
@@ -27,7 +25,7 @@ public class UsersRouter {
                 .route(POST("/users").and(accept(APPLICATION_JSON)), userHandler::createUser)
                 .andRoute(GET("/users").and(accept(APPLICATION_JSON)), userHandler::listUser)
                 .andRoute(GET("/users/{userId}").and(accept(APPLICATION_JSON)), userHandler::getUserById)
-                .andRoute(DELETE("/users/userId").and(accept(APPLICATION_JSON)), userHandler::deleteUser);
+                .andRoute(DELETE("/users/{userId}").and(accept(APPLICATION_JSON)), userHandler::deleteUser);
     }
 
 }

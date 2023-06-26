@@ -1,13 +1,12 @@
-package com.musala.drones.handler;
+package com.musala.drones.handlers;
 
-import com.musala.drones.model.entity.User;
+import com.musala.drones.model.entity.UserEntity;
 import com.musala.drones.model.dto.ApiResponse;
 import com.musala.drones.model.dto.LoginRequest;
 import com.musala.drones.model.dto.LoginResponse;
 import com.musala.drones.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -31,9 +30,9 @@ public class AuthHandler {
     public Mono<ServerResponse> login(ServerRequest request) {
         Mono<LoginRequest> loginRequest = request.bodyToMono(LoginRequest.class);
         return loginRequest.flatMap(login -> userRepository.findByUsername(login.getUsername())
-                .flatMap(user -> {
-                    if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
-                        return ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromValue(new ApiResponse(HttpStatus.OK.value(), "Successful login", new LoginResponse(tokenProvider.generateToken(user)))));
+                .flatMap(userEntity -> {
+                    if (passwordEncoder.matches(login.getPassword(), userEntity.getPassword())) {
+                        return ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromValue(new ApiResponse(HttpStatus.OK.value(), "Successful login", new LoginResponse(tokenProvider.generateToken(userEntity)))));
                     } else {
                         return ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Invalid credentials", null)));
                     }
@@ -42,12 +41,12 @@ public class AuthHandler {
     }
 
     public Mono<ServerResponse> signUp(ServerRequest request) {
-        Mono<User> userMono = request.bodyToMono(User.class);
-        return userMono.map(user -> {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            return user;
-        }).flatMap(user -> userRepository.findByUsername(user.getUsername())
-                .flatMap(dbUser -> ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "User already exist", null))))
-                .switchIfEmpty(userRepository.save(user).flatMap(savedUser -> ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromObject(savedUser)))));
+        Mono<UserEntity> userMono = request.bodyToMono(UserEntity.class);
+        return userMono.map(userEntity -> {
+            userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+            return userEntity;
+        }).flatMap(userEntity -> userRepository.findByUsername(userEntity.getUsername())
+                .flatMap(dbUserEntity -> ServerResponse.badRequest().body(BodyInserters.fromValue(new ApiResponse(HttpStatus.BAD_REQUEST.value(), "User already exist", null))))
+                .switchIfEmpty(userRepository.save(userEntity).flatMap(savedUserEntity -> ServerResponse.ok().contentType(APPLICATION_JSON).body(BodyInserters.fromValue(savedUserEntity)))));
     }
 }

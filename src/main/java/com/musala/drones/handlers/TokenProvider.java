@@ -1,7 +1,7 @@
-package com.musala.drones.handler;
+package com.musala.drones.handlers;
 
 
-import com.musala.drones.model.entity.User;
+import com.musala.drones.model.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
@@ -43,10 +43,10 @@ public class TokenProvider implements Serializable {
         return expiration.before(new Date());
     }
 
-    public String generateToken(User user) {
-        final String authorities = user.getRole();
+    public String generateToken(UserEntity userEntity) {
+        final String authorities = userEntity.getRole();
         return Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(userEntity.getUsername())
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(HS256, SIGNING_KEY)
                 .setIssuedAt(new Date(System.currentTimeMillis()))

@@ -29,7 +29,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) {
-        String[] patterns = new String[]{"/auth/**"};
+        String[] patterns = new String[]{"/auth/**", "/swagger-ui.html", "/swagger-ui/index.html", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**"};
         return http
                 .exceptionHandling()
                 .authenticationEntryPoint((swe, e) -> Mono.fromRunnable(() -> {
@@ -42,7 +42,6 @@ public class SecurityConfig {
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange()
                 .pathMatchers(patterns).permitAll()
-                .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyExchange().authenticated()
                 .and()
                 .build();

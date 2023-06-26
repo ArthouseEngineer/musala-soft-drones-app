@@ -1,6 +1,8 @@
+server:
+  port: 8080
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/musala_drones
+    url: r2dbc:postgresql://localhost:5432/musala_drones?schema=musala_drones
     username: postgres
     password: postgres
   application:
@@ -10,3 +12,6 @@ logging:
     name: logs/drone_capacity.log
   level:
     liquibase: debug
+
+musala:
+  drones-scheduler-delay-ms: 35000

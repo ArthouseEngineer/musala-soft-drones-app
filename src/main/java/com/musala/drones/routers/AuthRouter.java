@@ -1,6 +1,6 @@
-package com.musala.drones.config;
+package com.musala.drones.routers;
 
-import com.musala.drones.handler.AuthHandler;
+import com.musala.drones.handlers.AuthHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

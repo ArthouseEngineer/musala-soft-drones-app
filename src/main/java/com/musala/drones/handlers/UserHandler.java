@@ -1,7 +1,7 @@
-package com.musala.drones.handler;
+package com.musala.drones.handlers;
 
 
-import com.musala.drones.model.entity.User;
+import com.musala.drones.model.entity.UserEntity;
 import com.musala.drones.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,22 +20,22 @@ public class UserHandler {
     private final UserRepository userRepository;
 
     public Mono<ServerResponse> createUser(ServerRequest request) {
-        Mono<User> userMono = request.bodyToMono(User.class).flatMap(userRepository::save);
-        return ServerResponse.ok().contentType(APPLICATION_JSON).body(userMono, User.class);
+        Mono<UserEntity> userMono = request.bodyToMono(UserEntity.class).flatMap(userRepository::save);
+        return ServerResponse.ok().contentType(APPLICATION_JSON).body(userMono, UserEntity.class);
     }
 
     public Mono<ServerResponse> listUser(ServerRequest request) {
-        Flux<User> user = userRepository.findAll();
-        return ServerResponse.ok().contentType(APPLICATION_JSON).body(user, User.class);
+        Flux<UserEntity> user = userRepository.findAll();
+        return ServerResponse.ok().contentType(APPLICATION_JSON).body(user, UserEntity.class);
     }
 
     public Mono<ServerResponse> getUserById(ServerRequest request) {
         Long userId = Long.valueOf(request.pathVariable("userId"));
         Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-        Mono<User> userMono = userRepository.findById(userId);
-        return userMono.flatMap(user -> ServerResponse.ok()
+        Mono<UserEntity> userMono = userRepository.findById(userId);
+        return userMono.flatMap(userEntity -> ServerResponse.ok()
                         .contentType(APPLICATION_JSON)
-                        .body(BodyInserters.fromValue(user)))
+                        .body(BodyInserters.fromValue(userEntity)))
                 .switchIfEmpty(notFound);
     }
 
